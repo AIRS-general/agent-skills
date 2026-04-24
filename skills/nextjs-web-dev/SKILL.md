@@ -99,6 +99,8 @@ Uninstall dependencies:
 - Prefer TypeScript for all React/Next.js code and examples.
 - Prefer Shadcn UI for component library.
 - Prefer Zustand for state management.
+- Prefer TanStack Query for data fetching.
+- Prefer Faker-js for dummy data.
 - Follow security best practices: never log secrets, never expose server-only env vars to the client, validate untrusted input.
 - use `lib/` for shared logic that is not UI.
 - use `lib/backend/` for backend logic.

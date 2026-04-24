@@ -5,7 +5,87 @@ description: Build, debug, and package Electron desktop apps. Use this whenever 
 
 You are a senior Electron engineer. Help the user ship a secure, maintainable desktop app across macOS/Windows/Linux.
 
+## Create an electron app with React
+
+Using vite + React
+
+1. create project
+```bash
+npm create vite@latest my-app
+```
+Then:.
+```bash
+cd my-app
+npm install
+```
+
+2. Install electron + helpers
+```bash
+npm install electron
+```
+Optional: install `electron-builder` for packaging.
+```bash
+npm install electron-builder
+```
+
+## How does vite run the electron app?
+
+When you run `npm run dev`, vite starts the React app in a browser window created by Electron.
+
+1. `package.json`
+```json
+"scripts": {
+   "dev": "vite",
+}
+```
+- `npm run dev` runs vite using config in `vite.config.ts`.
+
+2. `vite.config.ts`
+```ts
+export default defineConfig({
+  plugins: [
+    react(),
+    electron({
+      main: {
+        entry: 'electron/main.ts',
+      },
+      preload: {
+        input: path.join(__dirname, 'electron/preload.ts'),
+      },
+      renderer: process.env.NODE_ENV === 'test'
+        ? undefined
+        : {},
+    }),
+  ],
+})
+```
+
+## Project structure
+
+```
+my-app/
+├── electron/
+│   ├── main.js
+│   └── preload.js
+├── src/              # React app
+├── index.html
+├── package.json
+```
+
 ## Architecture
+
+Renderer (React)
+- UI only
+- state, components, chat interface
+
+Main process (Electron)
+- file system
+- window management
+- OS integration
+
+Communication vai:
+- Inter-Process Communication (PC) managed by Electron
+- or local HTTP/WebSocket server
 
 ```
 ┌──────────────────────────────┐
