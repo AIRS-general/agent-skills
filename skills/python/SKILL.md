@@ -42,6 +42,10 @@ hints = get_type_hints(process, include_extras=True)
 print(hints['value'].__metadata__)  # Output: ('Range[1-100]',)
 ```
 
+### `from __future__ import annotations`
+
+a very clean way to avoid circular import issues caused by type hints—and in modern Python, it’s often the best default choice.
+
 ## Context management
 
 A context manger is a construct that lets you manage setup and cleanup automatically using the with statement.

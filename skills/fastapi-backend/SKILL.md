@@ -262,8 +262,18 @@ config.set_main_option(
   - then generates migration scripts based on the differences.
   ```py
   from app.db.base import Base
+  import app.db.models
+
 
   target_metadata = Base.metadata
+  ```
+  ```py
+  # app/db/models/__init__.py
+  from app.db.models.account import Account
+
+  __all__ = [
+      "Account",
+  ]
   ```
 
 
@@ -323,15 +333,18 @@ If the repo doesn’t have a strong convention, use this:
 ```
 app/
   main.py                # creates FastAPI app, includes routers
+  deps.py              # shared dependencies (auth, db session, etc.)
   api/
     v1/
-      health.py
-      users.py
-    deps.py              # shared dependencies (auth, db session, etc.)
+      router.py
+      endpoints/
+        health.py
+        users.py
   core/
     config.py            # settings
     security.py          # auth helpers (JWT, password hashing, etc.)
     logging.py
+  repositories/          # DB access layer (Optional)
   schemas/               # Pydantic request/response models
   services/              # business logic
   db/                    # db session, engine, migrations integration
@@ -348,6 +361,10 @@ project.toml
 docker-compose.yml       # Docker Compose file for DB, Server, etc.
 Makefile                 # Makefile for common tasks
 ```
+
+## Imports
+
+Use absolute imports imports for everything in a FastAPI project.
 
 ## Formatting
 

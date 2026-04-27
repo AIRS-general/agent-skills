@@ -167,3 +167,30 @@ from app.models import Account, Team
 `alembic upgrade head`
 
 Undo migration: `alembic downgrade`
+
+## Default Datetime
+
+```py
+import sqlalchemy as sa
+
+class Model(BaseModel):
+    __tablename__ = "models"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+
+    created_at: Mapped[datetime] = mapped_column(
+        sa.DateTime(timezone=True),
+        nullable=False,
+        server_default=sa.func.now(),
+    )
+
+    updated_at: Mapped[datetime] = mapped_column(
+        sa.DateTime(timezone=True),
+        nullable=False,
+        server_default=sa.func.now(),
+        onupdate=sa.func.now(),
+    )
+```
+use `sa.func.now()` to set default value to current time. it uses database time.
+
+## Test database
