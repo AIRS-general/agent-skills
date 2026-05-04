@@ -161,6 +161,78 @@ my-app/
 └── package.json
 ```
 
+## Project structure
+
+```
+my-app/
+├── package.json
+├── tsconfig.json
+├── electron.vite.config.ts   # or vite config
+├── /extensions   # user installed or built-in plugins
+│  ├── /core                  # First party extensions
+│  ├── /installed             # user installed
+│  │   ├── extension-a/      # ipcMain.handle
+│  │   │   ├── manifest.json           # app entry
+│  │   │   ├── main.ts           # basic logic
+│  │   │   ├── renderer.ts       # app entry
+│  │   │   └── assets/     # ipcMain.on
+│  │   └── extension-b/
+├── /src
+│
+│  ├── /main                  # Electron main process
+│  │   ├── index.ts           # app entry
+│  │   ├── window.ts          # BrowserWindow setup
+│  │   ├── ipc/
+│  │   │   ├── handlers/      # ipcMain.handle
+│  │   │   └── listeners/     # ipcMain.on
+│  │   ├── extensions/             # app state (optional)
+│  │   │   ├── loader.tsx
+│  │   │   ├── sandbox.tsx
+│  │   │   └── registry.tsx
+│  │   ├── services/          # business logic (Node side)
+│  │   ├── store/             # app state (optional)
+│  │   └── utils/
+│
+│  ├── /preload               # secure bridge
+│  │   └── index.ts           # contextBridge.exposeInMainWorld
+│
+│  ├── /renderer              # React app
+│  │   ├── index.html
+│  │   ├── main.tsx
+│  │   │
+│  │   ├── /app               # app-level config
+│  │   │   ├── App.tsx
+│  │   │   ├── routes.tsx
+│  │   │   └── providers.tsx
+│  │   │
+│  │   ├── /features          # 🔥 domain-driven modules
+│  │   │   ├── chat/
+│  │   │   │   ├── components/
+│  │   │   │   ├── hooks/
+│  │   │   │   ├── api.ts
+│  │   │   │   └── types.ts
+│  │   │   ├── settings/
+│  │   │   └── ...
+│  │   │
+│  │   ├── extensions/             # app state (optional)
+│  │   │   ├── ExtensionHost.tsx
+│  │   │   └── hooks/
+│  │   ├── /components        # shared UI
+│  │   ├── /hooks             # shared hooks
+│  │   ├── /lib               # helpers (axios, utils)
+│  │   ├── /store             # Zustand/Redux
+│  │   ├── /styles
+│  │   └── /types
+│
+│  ├── /shared                # 🔥 shared types/contracts
+│  │   ├── ipc.ts             # IPC channel definitions
+│  │   └── types.ts
+│
+├── /assets
+└── /dist
+```
+
+
 ## IPC Design
 
 ```

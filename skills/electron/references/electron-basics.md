@@ -335,4 +335,186 @@ BrowserWindow connects to renderer via IPC:
 win.webContents.send("event", data);
 ```
 
+## Main process
+
+`main.ts` runs the app logic.
+- Creates windows
+- Handles business logic
+- Interacts with external services
+- Manages state
+
 ## Preload
+
+`preload.ts` sets up the API bridge between the **renderer** (UI) and **main process**.
+
+```ts
+import { ipcRenderer, contextBridge } from 'electron'
+```
+
+`ipcRenderer` and `contextBridge` are part of how your frontend (renderer process) safely talks to your backend (main process).
+
+1. `ipcRenderer` — communication **from renderer -> main**
+
+`ipcRenderer` is a module that lets your UI (React, plain JS, etc.) *send messages to the main process and receive responses*.
+
+Common use cases:
+* Read/write files
+* Access OS APIs
+* Trigger long-running tasks
+
+Example:
+Renderer (frontend):
+```ts
+import { ipcRenderer } from 'electron'
+
+// send message
+ipcRenderer.send('read-file', '/path/to/file')
+
+// receive response
+ipcRenderer.on('file-content', (_, data) => {
+  console.log(data)
+})
+```
+Main process:
+```ts
+import { ipcMain } from 'electron'
+import fs from 'fs'
+
+ipcMain.on('read-file', (event, path) => {
+  const content = fs.readFileSync(path, 'utf-8')
+  event.reply('file-content', content)
+})
+```
+
+2. `contextBridge` - secure API exposure
+By default, modern Electron apps run with:
+* `contextIsolation: true`
+* Node.js APIs not directly available in the renderer
+
+It allows you to **safely expose a controlled API from preload -> renderer**.
+
+Without it, doing this is dangerous
+```ts
+// ❌ BAD: exposes full Node.js
+window.require('fs')
+```
+
+Instead, you expose only what you want.
+```ts
+import { contextBridge, ipcRenderer } from 'electron'
+
+contextBridge.exposeInMainWorld('api', {
+  readFile: (path: string) => ipcRenderer.invoke('read-file', path),
+})
+```
+
+Renderer usage:
+```ts
+// now safely available
+const content = await window.api.readFile('/path')
+console.log(content)
+```
+
+The workflow:
+```
+Renderer (React UI)
+    ↓
+window.api.readFile()   ← exposed via contextBridge
+    ↓
+ipcRenderer.invoke()
+    ↓
+Main process (ipcMain.handle)
+    ↓
+OS / Node.js (fs, etc.)
+    ↓
+Result back to renderer
+```
+
+### core communication primitives of `ipcRenderer`
+
+```ts
+ipcRenderer.send('read-file', '/path/to/file')
+ipcRenderer.on('file-content', (_, data) => {
+  console.log(data)
+})
+ipcRenderer.off('file-content')
+
+ipcRenderer.invoke('read-file', '/path/to/file')
+```
+
+Event-based (push/listen): send, on, off
+
+Request-response (async call): invoke
+
+1. send -> file-and-forget
+```ts
+ipcRenderer.send('channel', ...args)
+```
+Sends a message to the main process without expecting a return value.
+
+Example:
+```ts
+// renderer
+ipcRenderer.send('log-message', 'hello')
+```
+```ts
+// main
+ipcMain.on('log-message', (_, msg) => {
+  console.log(msg)
+})
+```
+
+2. on -> listen for events
+```ts
+ipcRenderer.on(channel, listener)
+```
+Registers a listener for messages coming from the main process.
+
+Example:
+```ts
+// renderer
+ipcRenderer.on('file-updated', (_, data) => {
+  console.log(data)
+})
+```
+```ts
+// main
+event.sender.send('file-updated', { changed: true })
+```
+
+3. off -> remove listener
+```ts
+ipcRenderer.off(channel, listener)
+```
+Removes a previously registered listener.
+
+Example:
+```ts
+const handler = (_: any, data: any) => console.log(data)
+
+ipcRenderer.on('event', handler)
+
+// later, remove the listener
+ipcRenderer.off('event', handler)
+```
+
+4. invoke -> async request-response (modern way)
+```ts
+ipcRenderer.invoke('channel', ...args)
+```
+Sends a message and waits for a result (Promise-based).
+
+```ts
+// renderer
+const content = await ipcRenderer.invoke('read-file', '/path')
+```
+```ts
+// main
+ipcMain.handle('read-file', async (_, path) => {
+  return fs.readFileSync(path, 'utf-8')
+})
+```
+
+use `.invoke()` for most things.
+
+Expose these primitives in `preload.ts` to `contextBridge` could be risky.

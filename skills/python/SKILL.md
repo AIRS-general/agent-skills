@@ -156,3 +156,15 @@ def my_context():
 - “Why am I getting UnboundLocalError here?”
 - “Show me how generators work and when to use them.”
 - “Explain async/await like I’m new to it.”
+
+## Running tests
+
+`conftest.py`
+
+`conftest.py` is a pytest hook file, not a normal importable module. Pytest discovers `tests/conftest.py` automatically and makes its fixtures available to tests, but you generally don’t import from it .
+
+request those fixtures by naming them as function arguments:
+```py
+def test_xxx(settings):
+    ...
+```

@@ -57,3 +57,10 @@ _load_models()
   - `python -c "import app.db.models"`
   - `python -c "import app.db.models.training"`
 - Starting the app should no longer fail during mapper configuration.
+
+## Ruff remove intentionally unused imports
+
+```py
+from app.db import models  # noqa: F401
+```
+`noqa: F401` tells Ruff “don’t delete this unused import”.

@@ -193,4 +193,54 @@ class Model(BaseModel):
 ```
 use `sa.func.now()` to set default value to current time. it uses database time.
 
+## Check constraints
+
+Check constraints are often not reliably detected by autogenerate across DBs/dialects, and they may be skipped unless you explicitly add them (or configure comparison options).
+
+```py
+def upgrade():
+
+    ...
+
+    op.create_check_constraint(
+        "ck_trainings_finished_at_gte_started_at",
+        "trainings",
+        "(finished_at IS NULL) OR (started_at IS NULL) OR (finished_at >= started_at)",
+    )
+
+def downgrade():
+    ...
+    op.drop_check_constraint(
+        "ck_trainings_finished_at_gte_started_at",
+        "trainings",
+    )
+```
+
+## Alembic revision file
+
+Can modify the file name and the first line of the docstring.
+
+```py
+"""add_check_constraint_on_training_start_finish
+
+Revision ID: 0fa6b1933a70
+Revises: 596b0314d42c
+Create Date: 2026-04-28 11:25:57.285421
+
+"""
+
+# revision identifiers, used by Alembic.
+revision: str = "0fa6b1933a70"
+down_revision: str | Sequence[str] | None = "596b0314d42c"
+branch_labels: str | Sequence[str] | None = None
+depends_on: str | Sequence[str] | None = None
+```
+
+What matters to Alembic:
+- The revision value inside the file (e.g. revision = "0fa6b1933a70" )
+- The down_revision value
+- That Alembic can import the file and read those identifiers
+
+Can modify the file name and docstring.
+
 ## Test database
