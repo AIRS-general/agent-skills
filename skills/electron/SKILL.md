@@ -186,9 +186,9 @@ my-app/
 │  │   │   ├── handlers/      # ipcMain.handle
 │  │   │   └── listeners/     # ipcMain.on
 │  │   ├── extensions/             # app state (optional)
-│  │   │   ├── loader.tsx
-│  │   │   ├── sandbox.tsx
-│  │   │   └── registry.tsx
+│  │   │   ├── loader.ts
+│  │   │   ├── sandbox.ts
+│  │   │   └── registry.ts
 │  │   ├── services/          # business logic (Node side)
 │  │   ├── store/             # app state (optional)
 │  │   └── utils/
@@ -363,3 +363,87 @@ If the repo already has a different structure, follow it and only introduce new 
 - “My packaged app shows a blank window on macOS but works in dev. Diagnose and fix.”
 - “Add auto-update using the repo’s existing tooling and make it work on macOS and Windows.”
 - “Refactor IPC into typed contracts and enforce validation on all handlers.”
+
+## Build
+
+`npm run build`
+
+`dist/`
+- Produced by vite build .
+- Contains the renderer (your React UI) compiled into static web assets: index.html , bundled JS/CSS, assets.
+- This is what Electron loads in production via something like win.loadFile(.../dist/index.html) .
+
+`dist-electron/`
+- Produced by the Electron Vite plugin build step.
+- Contains the compiled Electron main process and preload script (Node/Electron-side bundles), e.g. main.js , preload.mjs (filenames can vary).
+- This is what Electron runs as the desktop app “backend” (window creation, IPC, starting Go backend, etc.). Your app entry in package.json points to this output.
+
+`release/`
+- Produced by electron-builder .
+- Contains the packaged distributables/installers (macOS .app / .dmg , Windows installer, Linux AppImage) and build metadata.
+- Your builder config sets the output to release/${version} in electron-builder.json5 , and it packages the app by including dist/ and dist-electron/ .
+
+## Setup tailwind v4
+
+`tailwindcss`: A utility-first CSS framework. 
+* Gives you pre-defined classes like flex, mt-4, text-center
+* You compose styles directly in HTML/JSX instead of writing custom CSS
+
+```bash
+npm install tailwindcss @tailwindcss/vite
+```
+
+`tailwindcss/vite`: A Vite plugin for Tailwind CSS.
+
+In `vite.config.ts`:
+```ts
+import tailwindcss from "@tailwindcss/vite"
+
+export default defineConfig({
+  plugins: [tailwindcss()],
+})
+```
+
+in CSS
+```css
+@import "tailwindcss";
+```
+
+## setup shadcn 
+
+`tsconfig.json`
+```ts
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/renderer/*"]
+    }
+  }
+}
+```
+
+in vite.config.ts
+
+```ts
+resolve: {
+  alias: {
+    "@": path.join(__dirname, "src/renderer"),
+  },
+},
+```
+
+```bash
+npx shadcn@latest init
+```
+Interactive setup for shadcn
+1. Select a component library
+- Radix (default)
+- Base (newer)
+
+2. Which preset would you like to use
+- Nova
+
+This will create a `components.json` file. Used by shadcn/ui to understand how your project is structured and how it should generate components.
+
+Cmd + Opt + I

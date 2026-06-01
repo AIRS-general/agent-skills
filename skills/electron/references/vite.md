@@ -146,3 +146,30 @@ Output:
 dist/              # frontend (Vite build)
 dist-electron/     # main + preload
 ```
+
+## `vite.config.ts`
+
+
+```ts
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+
+// https://vitejs.dev/config/
+export default defineConfig({
+  root: 'src',
+  publicDir: 'public',
+  build: {
+    outDir: 'dist',
+    emptyOutDir: true,
+  },
+  plugins: [
+    react(),
+  ],
+})
+```
+- `root`: project root.
+  - locating index.html
+  - resolving absolute URLs like `/main.tsx` relative to that root.
+- `publicDir`: where static assets live. 
+- `build.outDir`: where vite writes the built files
+- `build.emptyOutDir`: clears dist/ before each build so old files don’t stick around and cause confusion.

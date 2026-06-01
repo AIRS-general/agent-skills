@@ -1,7 +1,14 @@
 {
     "python.languageServer": "None",
     "cSpell.words": [
+        "asyncio",
+        "goroutines",
+        "HITL",
+        "mapstructure",
         "Meslo",
-        "noqa"
+        "modernc",
+        "noqa",
+        "pygments",
+        "Unmarshal"
     ]
 }

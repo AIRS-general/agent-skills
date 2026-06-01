@@ -168,3 +168,90 @@ request those fixtures by naming them as function arguments:
 def test_xxx(settings):
     ...
 ```
+
+## Ipython
+
+For ipython related: like jupyter notebook, ipdb refer to [IPython](ref/IPython.md)
+
+## pickle
+
+`_pickle.PicklingError: Can't pickl ... <lambda>`
+
+cannot serialize lambda functions or locally defined functions.
+
+## static method
+
+A `@staticmethod` in Python is a method that:
+* belongs to the class namespace
+* does not receive self
+* does not receive cls
+* behaves like **a regular function grouped inside a class**
+
+```py
+class MathUtils:
+    @staticmethod
+    def add(a, b):
+        return a + b
+
+
+result = MathUtils.add(3, 5)
+
+print(result)
+```
+
+## `classmethod`
+
+A `@classmethod` in Python is a method that receives the class itself as the first argument, usually named `cls`.
+It is used when the method needs to:
+* access class variables
+* create class instances
+* support inheritance-aware constructors
+
+```py
+class User:
+    count = 0
+
+    def __init__(self, name):
+        self.name = name
+        User.count += 1
+
+    @classmethod
+    def get_count(cls):
+        return cls.count
+
+
+print(User.get_count())
+```
+
+## `global`
+
+The `global` keyword is used inside a function to indicate that a variable refers to a module-level (global) variable rather than creating a new local variable.
+
+Without global
+```py
+count = 0
+
+def increment():
+    count = count + 1  # Error
+
+increment()
+```
+This raises:
+```
+UnboundLocalError: local variable 'count' referenced before assignment
+```
+Because Python sees the assignment to count and treats it as a local variable.
+
+With global
+```py
+count = 0
+
+def increment():
+    global count
+    count += 1
+
+increment()
+print(count)  # 1
+```
+
+The global declaration tells Python to modify the module-level variable.
